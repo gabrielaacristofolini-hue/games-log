@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Games Log</title>
-<meta name="description" content="Log pessoal dos jogos que eu zerei, estou jogando e quero jogar.">
+<meta name="description" content="Log pessoal dos jogos que eu zerei e estou jogando.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -16,13 +16,15 @@
     --faint: #a8a29e;
     --line: #e7e5e4;
     --field: #ffffff;
+    --row-hover: #f5f5f4;
     --thumb-l: 90%;
     --thumb-text: rgba(28, 25, 23, .55);
-    --done: #16a34a;
-    --playing: #d97706;
-    --played: #7c3aed;
-    --wish: #0284c7;
-    --star: #1c1917;
+    --yes: #15803d;
+    --yes-bg: #dcfce7;
+    --plat: #6d28d9;
+    --plat-bg: #ede9fe;
+    --playing: #b45309;
+    --playing-bg: #fef3c7;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -32,13 +34,15 @@
       --faint: #5c5c61;
       --line: #232326;
       --field: #17171a;
+      --row-hover: #151517;
       --thumb-l: 20%;
       --thumb-text: rgba(255, 255, 255, .6);
-      --done: #4ade80;
+      --yes: #4ade80;
+      --yes-bg: rgba(74, 222, 128, .12);
+      --plat: #c4b5fd;
+      --plat-bg: rgba(196, 181, 253, .14);
       --playing: #fbbf24;
-      --played: #a78bfa;
-      --wish: #38bdf8;
-      --star: #ececec;
+      --playing-bg: rgba(251, 191, 36, .12);
     }
   }
   * { box-sizing: border-box; }
@@ -47,89 +51,96 @@
     background: var(--bg);
     color: var(--text);
     font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 56px 16px 80px; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 56px 16px 80px; }
 
-  header { margin-bottom: 40px; }
+  header { margin-bottom: 36px; }
   h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
-  .subtitle { margin: 4px 0 0; color: var(--muted); }
+  .subtitle { margin: 4px 0 0; color: var(--muted); font-size: 15px; }
 
-  .stats { display: flex; flex-wrap: wrap; gap: 20px 40px; padding: 0 0 32px; margin-bottom: 32px; border-bottom: 1px solid var(--line); }
+  .stats { display: flex; flex-wrap: wrap; gap: 20px 40px; padding-bottom: 28px; margin-bottom: 28px; border-bottom: 1px solid var(--line); }
   .stat .value { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
   .stat .label { color: var(--muted); font-size: 13px; }
 
   .toolbar { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .tabs { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 4px 22px; }
   .tab {
-    border: 0; background: none; color: var(--muted); font: inherit; font-weight: 500;
+    border: 0; background: none; color: var(--muted); font: inherit; font-size: 15px; font-weight: 500;
     padding: 6px 0; cursor: pointer; border-bottom: 2px solid transparent;
   }
   .tab:hover { color: var(--text); }
   .tab.active { color: var(--text); border-bottom-color: var(--text); }
   .tab .count { color: var(--faint); margin-left: 4px; font-weight: 400; }
-  .filters { display: flex; gap: 8px; }
-  select, input[type=search] {
+  input[type=search] {
     background: var(--field); color: var(--text); border: 1px solid var(--line); border-radius: 8px;
-    padding: 7px 10px; font: inherit; font-size: 14px;
+    padding: 7px 10px; font: inherit; width: 200px;
   }
-  select:focus, input[type=search]:focus { outline: none; border-color: var(--muted); }
-  input[type=search] { width: 180px; }
+  input[type=search]:focus { outline: none; border-color: var(--muted); }
 
-  .year-group { margin-top: 32px; }
-  .year-group h2 { font-size: 12px; font-weight: 600; color: var(--faint); text-transform: uppercase; letter-spacing: .08em; margin: 0 0 4px; }
+  .hint { color: var(--muted); font-size: 13px; margin: 12px 0 0; }
 
-  .game {
-    display: grid; grid-template-columns: 64px 1fr auto; gap: 4px 18px; align-items: start;
-    padding: 18px 0; border-bottom: 1px solid var(--line);
+  .table-wrap { overflow-x: auto; margin-top: 20px; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left; font-size: 12px; font-weight: 500; color: var(--faint);
+    padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap;
   }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; white-space: nowrap; }
+  tbody tr:not(.group):hover td { background: var(--row-hover); }
+  tr.group td { padding: 28px 0 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
+  tr.group:first-child td { padding-top: 16px; }
+  tr.group span { color: var(--faint); font-weight: 400; margin-left: 6px; }
+  th:first-child, td:first-child { padding-left: 0; }
+  th:last-child, td:last-child { padding-right: 0; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .dim { color: var(--muted); }
+
+  .game { display: flex; align-items: center; gap: 12px; white-space: normal; min-width: 200px; }
   .thumb {
-    grid-row: span 2; width: 64px; height: 64px; border-radius: 10px; overflow: hidden;
-    display: grid; place-items: center; background: hsl(var(--h) 30% var(--thumb-l)); position: relative;
+    flex: none; width: 40px; height: 40px; border-radius: 8px; overflow: hidden; position: relative;
+    display: grid; place-items: center; background: hsl(var(--h) 30% var(--thumb-l));
   }
   .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-  .thumb span { font-size: 18px; font-weight: 700; color: var(--thumb-text); letter-spacing: -0.02em; }
+  .thumb span { font-size: 12px; font-weight: 700; color: var(--thumb-text); }
+  .game .name { font-weight: 600; }
+  .game .name a { color: inherit; text-decoration: none; }
+  .game .name a:hover { text-decoration: underline; }
+  .game .note { color: var(--muted); font-size: 12px; }
+  .m-only { display: none; }
 
-  .title { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
-  .sub { display: flex; flex-wrap: wrap; gap: 4px 10px; color: var(--muted); font-size: 13px; margin-top: 2px; }
-  .status { display: inline-flex; align-items: center; gap: 6px; }
-  .status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-  .status.zerado { color: var(--done); }
-  .status.jogando { color: var(--playing); }
-  .status.jogado { color: var(--played); }
-  .status.quero { color: var(--wish); }
+  .pill { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; }
+  .pill.yes { color: var(--yes); background: var(--yes-bg); }
+  .pill.plat { color: var(--plat); background: var(--plat-bg); }
+  .pill.playing { color: var(--playing); background: var(--playing-bg); }
+  .no { color: var(--faint); }
+  .when { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
 
-  .details { grid-column: 2 / -1; display: flex; flex-direction: column; gap: 8px; }
-  .meta { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 13px; color: var(--muted); }
-  .meta b { color: var(--text); font-weight: 500; }
-  .progress { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); max-width: 320px; }
-  .bar { flex: 1; height: 3px; background: var(--line); border-radius: 999px; overflow: hidden; }
+  .trophies { display: flex; align-items: center; gap: 10px; min-width: 150px; }
+  .trophies .pct { font-weight: 600; width: 38px; text-align: right; font-variant-numeric: tabular-nums; }
+  .bar { flex: 1; height: 4px; background: var(--line); border-radius: 999px; overflow: hidden; min-width: 50px; }
   .bar span { display: block; height: 100%; background: var(--text); }
-  .note { font-size: 13px; color: var(--muted); }
+  .trophies .count { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 
-  .side { text-align: right; display: flex; flex-direction: column; align-items: end; gap: 4px; }
-  .stars { color: var(--star); font-size: 13px; letter-spacing: 1px; white-space: nowrap; }
-  .stars .off { color: var(--line); }
-  .stars.none { color: var(--faint); letter-spacing: 0; }
-  .side a { color: var(--muted); font-size: 13px; text-decoration: none; }
-  .side a:hover { color: var(--text); }
+  .empty { color: var(--muted); padding: 48px 0; text-align: center; border-bottom: 1px solid var(--line); }
 
-  .empty { color: var(--muted); padding: 48px 0; text-align: center; }
-
-  footer { margin-top: 56px; color: var(--faint); font-size: 12px; }
+  footer { margin-top: 48px; color: var(--faint); font-size: 12px; }
 
   @media (max-width: 560px) {
     .wrap { padding-top: 40px; }
     .stats { gap: 16px 28px; }
     .toolbar { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
-    .filters > * { flex: 1 1 0; min-width: 0; width: 0; }
-    .game { grid-template-columns: 48px 1fr; column-gap: 14px; }
-    .thumb { width: 48px; height: 48px; grid-row: span 1; }
-    .thumb span { font-size: 14px; }
-    .side { grid-column: 2; grid-row: 2; flex-direction: row; align-items: center; gap: 14px; text-align: left; }
-    .details { grid-column: 2; }
+    input[type=search] { width: 100%; }
+    /* No celular ficam só Jogo, Zerado, Platina e % de troféus; a plataforma vai para baixo do nome. */
+    .opt, .trophies .bar, .trophies .count { display: none; }
+    .m-only { display: inline; }
+    th, td { padding-left: 8px; padding-right: 8px; }
+    .game { min-width: 0; gap: 10px; }
+    .thumb { width: 34px; height: 34px; }
+    .trophies { min-width: 0; }
+    .trophies .pct { width: auto; }
   }
 </style>
 </head>
@@ -137,22 +148,20 @@
 <div class="wrap">
   <header>
     <h1>Games Log</h1>
-    <p class="subtitle">O que eu zerei, o que estou jogando e o que quero jogar.</p>
+    <p class="subtitle">O que eu zerei e o que estou jogando.</p>
   </header>
 
   <section class="stats" id="stats"></section>
 
   <div class="toolbar">
     <nav class="tabs" id="tabs"></nav>
-    <div class="filters">
-      <select id="yearFilter" aria-label="Filtrar por ano"></select>
-      <input type="search" id="search" placeholder="Buscar jogo" aria-label="Buscar jogo">
-    </div>
+    <input type="search" id="search" placeholder="Buscar jogo" aria-label="Buscar jogo">
   </div>
+  <p class="hint" id="hint"></p>
 
   <main id="list"></main>
 
-  <footer>Datas de conclusão baseadas no troféu de fim de jogo da PSN. Notas são minhas, não da comunidade.</footer>
+  <footer>Dados da PSN. Zerado = data do troféu de fim de história. Jogando = começou, ainda não zerou e jogou nos últimos 30 dias.</footer>
 </div>
 
 <script>
@@ -160,27 +169,26 @@
  * ============================================================
  *  DADOS DOS JOGOS — edite aqui para adicionar/atualizar jogos
  * ============================================================
- *  status:       "zerado" | "jogando" | "jogado" (joguei mas não zerei) | "quero"
  *  platform:     "PS5", "PS4", ...
- *  rating:       minha nota de 0 a 5 (null = sem nota)
  *  startedAt:    data do primeiro troféu (AAAA-MM-DD)
- *  finishedAt:   data do troféu que indica que o jogo foi zerado (AAAA-MM-DD)
+ *  finishedAt:   data do troféu que indica que o jogo foi zerado (AAAA-MM-DD); null = não zerado
  *  finishTrophy: nome do troféu usado para determinar que zerou
+ *  lastPlayedAt: último acesso ao jogo (AAAA-MM-DD); define se ele aparece em "Jogando"
  *  trophies:     { earned, total, progress (%), platinum (true/false) }
- *  hours:        horas jogadas (se disponível; aceita decimal, ex.: 9.15 = 9h09)
+ *  hours:        horas jogadas (aceita decimal, ex.: 9.15 = 9h09)
  *  cover:        URL da capa, ou lista de URLs tentadas em ordem se uma falhar (opcional).
  *                Se o jogo tiver capa salva em COVERS (no fim do script), ela é usada primeiro.
  *  psnUrl:       link da página do jogo no perfil da PSN
+ *  notes:        observação curta (opcional)
  */
 const GAMES = [
   {
     title: "Resident Evil 3",
     platform: "PS5",
-    status: "zerado",
-    rating: 3,
     startedAt: "2026-03-11",
     finishedAt: "2026-03-15",
     finishTrophy: "Survivor",
+    lastPlayedAt: "2026-05-10",
     trophies: { earned: 21, total: 33, progress: 40, platinum: false },
     hours: 9.15,
     cover: [
@@ -188,38 +196,40 @@ const GAMES = [
       "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/952060/header.jpg"
     ],
     psnUrl: "https://psnprofiles.com/trophies/16678-resident-evil-3/gabcrstn",
-    notes: "Zerado no Hardcore (troféu Veteran junto com o Survivor)."
+    notes: "Zerado no Hardcore"
   }
 ];
 
 /* ============================================================ */
 
-const STATUS = {
-  zerado:  { label: "Zerados",     badge: "Zerado" },
-  jogando: { label: "Jogando",     badge: "Jogando" },
-  jogado:  { label: "Já joguei",   badge: "Joguei" },
-  quero:   { label: "Quero jogar", badge: "Quero jogar" }
+const PLAYING_DAYS = 30;
+const TABS = {
+  zerados: { label: "Zerados", hint: "Agrupados pelo ano em que zerei." },
+  jogando: { label: "Jogando", hint: `Comecei, ainda não zerei e joguei nos últimos ${PLAYING_DAYS} dias.` },
+  todos:   { label: "Todos",   hint: "Todos os jogos com troféus na PSN." }
 };
-const TAB_ORDER = ["zerado", "jogando", "jogado", "quero"];
 const MONTHS = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
 
-const state = { tab: "zerado", year: "all", query: "" };
+const state = { tab: "zerados", query: "" };
 try {
   const saved = JSON.parse(localStorage.getItem("gameslog-ui") || "{}");
-  if (saved.tab && STATUS[saved.tab]) state.tab = saved.tab;
+  if (saved.tab && TABS[saved.tab]) state.tab = saved.tab;
 } catch (e) {}
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
+const isDone = (g) => !!g.finishedAt;
+const isPlat = (g) => !!(g.trophies && g.trophies.platinum);
+function isPlaying(g) {
+  if (isDone(g) || !g.lastPlayedAt) return false;
+  return (Date.now() - new Date(g.lastPlayedAt)) / 86400000 <= PLAYING_DAYS;
+}
+
 function fmtDate(iso) {
   if (!iso) return null;
   const [y, m, d] = iso.split("-").map(Number);
   return `${String(d).padStart(2, "0")} ${MONTHS[m - 1]} ${y}`;
-}
-function yearOf(g) {
-  const d = g.finishedAt || g.startedAt;
-  return d ? d.slice(0, 4) : null;
 }
 function daysBetween(a, b) {
   if (!a || !b) return null;
@@ -245,128 +255,134 @@ function fmtHours(h) {
   const m = total % 60;
   return m ? `${Math.floor(total / 60)}h${String(m).padStart(2, "0")}` : `${total / 60}h`;
 }
-function stars(rating) {
-  if (rating == null) return `<div class="stars none">sem nota</div>`;
-  let out = "";
-  for (let i = 1; i <= 5; i++) out += i <= Math.round(rating) ? "★" : `<span class="off">★</span>`;
-  return `<div class="stars" aria-label="Nota ${rating} de 5" title="${rating}/5">${out}</div>`;
+
+/* ---------- Células da tabela ---------- */
+
+function gameCell(g) {
+  const covers = [COVERS[g.title], ...[].concat(g.cover || [])].filter(Boolean);
+  const thumb = `<span>${esc(initials(g.title))}</span>` + (covers.length
+    ? `<img src="${esc(covers[0])}" data-next="${esc(JSON.stringify(covers.slice(1)))}" alt="" loading="lazy" onerror="nextCover(this)">`
+    : "");
+  const name = g.psnUrl
+    ? `<a href="${esc(g.psnUrl)}" target="_blank" rel="noopener" title="Ver troféus na PSN">${esc(g.title)}</a>`
+    : esc(g.title);
+  const sub = [
+    g.platform ? `<span class="m-only">${esc(g.platform)}${g.notes ? " · " : ""}</span>` : "",
+    g.notes ? esc(g.notes) : ""
+  ].join("");
+  return `<div class="game"><div class="thumb" style="--h: ${hue(g.title)}">${thumb}</div>
+    <div><div class="name">${name}</div>${sub ? `<div class="note">${sub}</div>` : ""}</div></div>`;
+}
+function doneCell(g) {
+  if (isDone(g)) {
+    const days = daysBetween(g.startedAt, g.finishedAt);
+    const title = g.finishTrophy ? ` title="Troféu: ${esc(g.finishTrophy)}${days != null ? ` · ${days} dia${days === 1 ? "" : "s"} para zerar` : ""}"` : "";
+    return `<span class="pill yes"${title}>Zerado</span><span class="when">${fmtDate(g.finishedAt)}</span>`;
+  }
+  if (isPlaying(g)) return `<span class="pill playing">Jogando</span>`;
+  return `<span class="no">Não</span>`;
+}
+function platCell(g) {
+  return isPlat(g) ? `<span class="pill plat">Platinado</span>` : `<span class="no">Não</span>`;
+}
+function trophiesCell(g) {
+  const t = g.trophies;
+  if (!t) return `<span class="no">—</span>`;
+  return `<div class="trophies"><span class="pct">${t.progress}%</span><div class="bar"><span style="width:${t.progress}%"></span></div><span class="count">${t.earned}/${t.total}</span></div>`;
 }
 
+const COLUMNS = {
+  game:     { label: "Jogo",          cell: gameCell },
+  platform: { label: "Plataforma",    cell: (g) => `<span class="dim">${esc(g.platform || "—")}</span>`, opt: true },
+  done:     { label: "Zerado",        cell: doneCell },
+  plat:     { label: "Platina",       cell: platCell },
+  trophies: { label: "Troféus",       cell: trophiesCell },
+  started:  { label: "Começou",       cell: (g) => `<span class="dim">${fmtDate(g.startedAt) || "—"}</span>`, opt: true },
+  last:     { label: "Último acesso", cell: (g) => `<span class="dim">${fmtDate(g.lastPlayedAt) || "—"}</span>`, opt: true },
+  hours:    { label: "Horas",         cell: (g) => (g.hours != null ? fmtHours(g.hours) : `<span class="no">—</span>`), num: true, opt: true }
+};
+const TAB_COLUMNS = {
+  zerados: ["game", "platform", "done", "plat", "trophies", "hours"],
+  jogando: ["game", "platform", "started", "last", "plat", "trophies", "hours"],
+  todos:   ["game", "platform", "done", "plat", "trophies", "started", "last", "hours"]
+};
+
+function cls(c) {
+  const list = [COLUMNS[c].num && "num", COLUMNS[c].opt && "opt"].filter(Boolean);
+  return list.length ? ` class="${list.join(" ")}"` : "";
+}
+// groups: [[título do grupo ou null, jogos], ...] — uma tabela só, para as colunas alinharem entre os anos.
+function table(groups, cols) {
+  const head = cols.map((c) => `<th${cls(c)}>${COLUMNS[c].label}</th>`).join("");
+  const body = groups.map(([label, games]) =>
+    (label ? `<tr class="group"><td colspan="${cols.length}">${label}<span>${games.length} jogo${games.length === 1 ? "" : "s"}</span></td></tr>` : "") +
+    games.map((g) => `<tr>${cols.map((c) => `<td${cls(c)}>${COLUMNS[c].cell(g)}</td>`).join("")}</tr>`).join("")
+  ).join("");
+  return `<div class="table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+}
+
+/* ---------- Telas ---------- */
+
 function renderStats() {
-  const done = GAMES.filter((g) => g.status === "zerado");
+  const done = GAMES.filter(isDone);
   const thisYear = String(new Date().getFullYear());
-  const doneThisYear = done.filter((g) => g.finishedAt && g.finishedAt.startsWith(thisYear)).length;
-  const rated = GAMES.filter((g) => g.rating != null);
-  const avg = rated.length ? (rated.reduce((s, g) => s + g.rating, 0) / rated.length).toFixed(1) : "—";
-  const plats = GAMES.filter((g) => g.trophies && g.trophies.platinum).length;
   const hours = GAMES.reduce((s, g) => s + (g.hours || 0), 0);
   const items = [
     ["Zerados", done.length],
-    [`Em ${thisYear}`, doneThisYear],
-    ["Jogando", GAMES.filter((g) => g.status === "jogando").length],
-    ["Platinas", plats],
-    ["Nota média", avg],
+    [`Zerados em ${thisYear}`, done.filter((g) => g.finishedAt.startsWith(thisYear)).length],
+    ["Jogando", GAMES.filter(isPlaying).length],
+    ["Platinas", GAMES.filter(isPlat).length],
+    ["Jogos", GAMES.length],
     ["Horas", hours ? fmtHours(hours) : "—"]
   ];
   $("stats").innerHTML = items.map(([l, v]) => `<div class="stat"><div class="value">${v}</div><div class="label">${l}</div></div>`).join("");
 }
 
+function gamesInTab(tab) {
+  if (tab === "zerados") return GAMES.filter(isDone);
+  if (tab === "jogando") return GAMES.filter(isPlaying);
+  return GAMES.slice();
+}
+
 function renderTabs() {
-  $("tabs").innerHTML = TAB_ORDER.map((k) => {
-    const n = GAMES.filter((g) => g.status === k).length;
-    return `<button class="tab ${state.tab === k ? "active" : ""}" data-tab="${k}">${STATUS[k].label}<span class="count">${n}</span></button>`;
-  }).join("");
+  $("tabs").innerHTML = Object.entries(TABS).map(([k, t]) =>
+    `<button class="tab ${state.tab === k ? "active" : ""}" data-tab="${k}">${t.label}<span class="count">${gamesInTab(k).length}</span></button>`
+  ).join("");
   $("tabs").querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => {
     state.tab = b.dataset.tab;
-    state.year = "all";
     try { localStorage.setItem("gameslog-ui", JSON.stringify({ tab: state.tab })); } catch (e) {}
     render();
   }));
+  $("hint").textContent = TABS[state.tab].hint;
 }
 
-function renderYearFilter(games) {
-  const years = [...new Set(games.map(yearOf).filter(Boolean))].sort().reverse();
-  $("yearFilter").innerHTML = `<option value="all">Todos os anos</option>` +
-    years.map((y) => `<option value="${y}" ${state.year === y ? "selected" : ""}>${y}</option>`).join("");
-}
-
-function row(g) {
-  // As iniciais ficam por baixo da capa e aparecem se a imagem não carregar.
-  const covers = [COVERS[g.title], ...[].concat(g.cover || [])].filter(Boolean);
-  const thumb = `<span>${esc(initials(g.title))}</span>` + (covers.length
-    ? `<img src="${esc(covers[0])}" data-next="${esc(JSON.stringify(covers.slice(1)))}" alt="Capa de ${esc(g.title)}" loading="lazy" onerror="nextCover(this)">`
-    : "");
-  const t = g.trophies;
-  const days = daysBetween(g.startedAt, g.finishedAt);
-
-  // Só mostra o que já foi preenchido, para manter a linha enxuta.
-  const meta = [];
-  if (g.status === "zerado" && g.finishedAt) meta.push(["Zerado em", fmtDate(g.finishedAt)]);
-  if (g.startedAt) meta.push(["Começou em", fmtDate(g.startedAt)]);
-  if (g.status === "zerado" && days != null) meta.push(["Levou", `${days} dia${days === 1 ? "" : "s"}`]);
-  if (g.hours != null) meta.push(["Horas", fmtHours(g.hours)]);
-  if (t) meta.push(["Troféus", `${t.earned}/${t.total}${t.platinum ? " · Platina" : ""}`]);
-  if (g.finishTrophy) meta.push(["Troféu final", esc(g.finishTrophy)]);
-
-  const details = [
-    meta.length ? `<div class="meta">${meta.map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join("")}</div>` : "",
-    t && t.progress != null ? `<div class="progress"><div class="bar"><span style="width:${t.progress}%"></span></div>${t.progress}%</div>` : "",
-    g.notes ? `<div class="note">${esc(g.notes)}</div>` : ""
-  ].join("");
-
-  return `
-  <article class="game">
-    <div class="thumb" style="--h: ${hue(g.title)}">${thumb}</div>
-    <div>
-      <h3 class="title">${esc(g.title)}</h3>
-      <div class="sub">
-        <span class="status ${g.status}">${STATUS[g.status].badge}</span>
-        ${g.platform ? `<span>${esc(g.platform)}</span>` : ""}
-      </div>
-    </div>
-    <div class="side">
-      ${stars(g.rating)}
-      ${g.psnUrl ? `<a href="${esc(g.psnUrl)}" target="_blank" rel="noopener">Troféus ↗</a>` : ""}
-    </div>
-    ${details ? `<div class="details">${details}</div>` : ""}
-  </article>`;
-}
-
-function sortGames(list) {
-  // Mais recentes primeiro: data de conclusão, depois início; sem data vai pro fim.
-  return list.slice().sort((a, b) => {
-    const da = a.finishedAt || a.startedAt || "";
-    const db = b.finishedAt || b.startedAt || "";
-    if (da === db) return a.title.localeCompare(b.title);
-    if (!da) return 1;
-    if (!db) return -1;
-    return db.localeCompare(da);
-  });
-}
+// Mais recente primeiro pela data indicada; sem data vai pro fim.
+const byDateDesc = (key) => (a, b) => (b[key] || "").localeCompare(a[key] || "") || a.title.localeCompare(b.title);
 
 function renderList() {
-  const inTab = GAMES.filter((g) => g.status === state.tab);
-  renderYearFilter(inTab);
+  const inTab = gamesInTab(state.tab);
   const q = state.query.trim().toLowerCase();
-  let list = inTab.filter((g) => (state.year === "all" || yearOf(g) === state.year) && (!q || g.title.toLowerCase().includes(q)));
-  list = sortGames(list);
+  const list = inTab.filter((g) => !q || g.title.toLowerCase().includes(q));
+  const cols = TAB_COLUMNS[state.tab];
 
   if (!list.length) {
-    const msg = inTab.length ? "Nenhum jogo encontrado com esses filtros." : `Nenhum jogo em "${STATUS[state.tab].label}" ainda.`;
+    const msg = inTab.length ? "Nenhum jogo encontrado com essa busca." : `Nenhum jogo em "${TABS[state.tab].label}" agora.`;
     $("list").innerHTML = `<div class="empty">${msg}</div>`;
     return;
   }
 
-  // Agrupa por ano para a linha do tempo dos "últimos tempos".
-  const groups = new Map();
-  for (const g of list) {
-    const y = yearOf(g) || "Sem data";
-    if (!groups.has(y)) groups.set(y, []);
-    groups.get(y).push(g);
+  if (state.tab === "zerados") {
+    const groups = new Map();
+    for (const g of list.sort(byDateDesc("finishedAt"))) {
+      const y = g.finishedAt.slice(0, 4);
+      if (!groups.has(y)) groups.set(y, []);
+      groups.get(y).push(g);
+    }
+    $("list").innerHTML = table([...groups], cols);
+    return;
   }
-  $("list").innerHTML = [...groups].map(([y, gs]) =>
-    `<section class="year-group"><h2>${y}</h2>${gs.map(row).join("")}</section>`
-  ).join("");
+
+  $("list").innerHTML = table([[null, list.sort(byDateDesc("lastPlayedAt"))]], cols);
 }
 
 /*
@@ -383,7 +399,6 @@ function render() {
   renderList();
 }
 
-$("yearFilter").addEventListener("change", (e) => { state.year = e.target.value; renderList(); });
 $("search").addEventListener("input", (e) => { state.query = e.target.value; renderList(); });
 render();
 </script>
