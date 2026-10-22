@@ -168,7 +168,7 @@
  *  finishTrophy: nome do troféu usado para determinar que zerou
  *  trophies:     { earned, total, progress (%), platinum (true/false) }
  *  hours:        horas jogadas (se disponível; aceita decimal, ex.: 9.15 = 9h09)
- *  cover:        URL da capa (opcional)
+ *  cover:        URL da capa, ou lista de URLs tentadas em ordem se uma falhar (opcional)
  *  psnUrl:       link da página do jogo no perfil da PSN
  */
 const GAMES = [
@@ -182,7 +182,10 @@ const GAMES = [
     finishTrophy: "Survivor",
     trophies: { earned: 21, total: 33, progress: 40, platinum: false },
     hours: 9.15,
-    cover: "https://image.api.playstation.com/vulcan/ap/rnd/202206/0206/WmriZBRlSeXWEEDLJOWW7MdW.png",
+    cover: [
+      "https://image.api.playstation.com/vulcan/ap/rnd/202206/0206/WmriZBRlSeXWEEDLJOWW7MdW.png",
+      "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/952060/header.jpg"
+    ],
     psnUrl: "https://psnprofiles.com/trophies/16678-resident-evil-3/gabcrstn",
     notes: "Zerado no Hardcore (troféu Veteran junto com o Survivor)."
   }
@@ -228,6 +231,13 @@ function hue(title) {
   let h = 0;
   for (const c of title) h = (h * 31 + c.charCodeAt(0)) % 360;
   return h;
+}
+// Troca para a próxima capa da lista quando uma não carrega; sem mais opções, ficam as iniciais.
+function nextCover(img) {
+  const [next, ...rest] = JSON.parse(img.dataset.next || "[]");
+  if (!next) return img.remove();
+  img.dataset.next = JSON.stringify(rest);
+  img.src = next;
 }
 function fmtHours(h) {
   const total = Math.round(h * 60);
@@ -281,8 +291,10 @@ function renderYearFilter(games) {
 
 function row(g) {
   // As iniciais ficam por baixo da capa e aparecem se a imagem não carregar.
-  const thumb = `<span>${esc(initials(g.title))}</span>` +
-    (g.cover ? `<img src="${esc(g.cover)}" alt="Capa de ${esc(g.title)}" loading="lazy" onerror="this.remove()">` : "");
+  const covers = [].concat(g.cover || []).filter(Boolean);
+  const thumb = `<span>${esc(initials(g.title))}</span>` + (covers.length
+    ? `<img src="${esc(covers[0])}" data-next="${esc(JSON.stringify(covers.slice(1)))}" alt="Capa de ${esc(g.title)}" loading="lazy" onerror="nextCover(this)">`
+    : "");
   const t = g.trophies;
   const days = daysBetween(g.startedAt, g.finishedAt);
 
