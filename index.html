@@ -87,9 +87,9 @@
   }
   .thumb {
     grid-row: span 2; width: 64px; height: 64px; border-radius: 10px; overflow: hidden;
-    display: grid; place-items: center; background: hsl(var(--h) 30% var(--thumb-l));
+    display: grid; place-items: center; background: hsl(var(--h) 30% var(--thumb-l)); position: relative;
   }
-  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
   .thumb span { font-size: 18px; font-weight: 700; color: var(--thumb-text); letter-spacing: -0.02em; }
 
   .title { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
@@ -167,24 +167,24 @@
  *  finishedAt:   data do troféu que indica que o jogo foi zerado (AAAA-MM-DD)
  *  finishTrophy: nome do troféu usado para determinar que zerou
  *  trophies:     { earned, total, progress (%), platinum (true/false) }
- *  hours:        horas jogadas (se disponível)
+ *  hours:        horas jogadas (se disponível; aceita decimal, ex.: 9.15 = 9h09)
  *  cover:        URL da capa (opcional)
  *  psnUrl:       link da página do jogo no perfil da PSN
  */
 const GAMES = [
   {
     title: "Resident Evil 3",
-    platform: "PS4",
+    platform: "PS5",
     status: "zerado",
     rating: 3,
-    startedAt: null,
-    finishedAt: null,
-    finishTrophy: null,
-    trophies: null,
-    hours: null,
-    cover: "",
+    startedAt: "2026-03-11",
+    finishedAt: "2026-03-15",
+    finishTrophy: "Survivor",
+    trophies: { earned: 21, total: 33, progress: 40, platinum: false },
+    hours: 9.15,
+    cover: "https://image.api.playstation.com/vulcan/ap/rnd/202206/0206/WmriZBRlSeXWEEDLJOWW7MdW.png",
     psnUrl: "https://psnprofiles.com/trophies/16678-resident-evil-3/gabcrstn",
-    notes: "Troféus, datas e horas ainda não importados da PSN."
+    notes: "Zerado no Hardcore (troféu Veteran junto com o Survivor)."
   }
 ];
 
@@ -229,6 +229,11 @@ function hue(title) {
   for (const c of title) h = (h * 31 + c.charCodeAt(0)) % 360;
   return h;
 }
+function fmtHours(h) {
+  const total = Math.round(h * 60);
+  const m = total % 60;
+  return m ? `${Math.floor(total / 60)}h${String(m).padStart(2, "0")}` : `${total / 60}h`;
+}
 function stars(rating) {
   if (rating == null) return `<div class="stars none">sem nota</div>`;
   let out = "";
@@ -250,7 +255,7 @@ function renderStats() {
     ["Jogando", GAMES.filter((g) => g.status === "jogando").length],
     ["Platinas", plats],
     ["Nota média", avg],
-    ["Horas", hours ? `${hours}h` : "—"]
+    ["Horas", hours ? fmtHours(hours) : "—"]
   ];
   $("stats").innerHTML = items.map(([l, v]) => `<div class="stat"><div class="value">${v}</div><div class="label">${l}</div></div>`).join("");
 }
@@ -275,9 +280,9 @@ function renderYearFilter(games) {
 }
 
 function row(g) {
-  const thumb = g.cover
-    ? `<img src="${esc(g.cover)}" alt="Capa de ${esc(g.title)}" loading="lazy">`
-    : `<span>${esc(initials(g.title))}</span>`;
+  // As iniciais ficam por baixo da capa e aparecem se a imagem não carregar.
+  const thumb = `<span>${esc(initials(g.title))}</span>` +
+    (g.cover ? `<img src="${esc(g.cover)}" alt="Capa de ${esc(g.title)}" loading="lazy" onerror="this.remove()">` : "");
   const t = g.trophies;
   const days = daysBetween(g.startedAt, g.finishedAt);
 
@@ -286,7 +291,7 @@ function row(g) {
   if (g.status === "zerado" && g.finishedAt) meta.push(["Zerado em", fmtDate(g.finishedAt)]);
   if (g.startedAt) meta.push(["Começou em", fmtDate(g.startedAt)]);
   if (g.status === "zerado" && days != null) meta.push(["Levou", `${days} dia${days === 1 ? "" : "s"}`]);
-  if (g.hours != null) meta.push(["Horas", `${g.hours}h`]);
+  if (g.hours != null) meta.push(["Horas", fmtHours(g.hours)]);
   if (t) meta.push(["Troféus", `${t.earned}/${t.total}${t.platinum ? " · Platina" : ""}`]);
   if (g.finishTrophy) meta.push(["Troféu final", esc(g.finishTrophy)]);
 
