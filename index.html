@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Games Log</title>
+<meta name="description" content="Log pessoal dos jogos que eu zerei, estou jogando e quero jogar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #161a22;
+    --surface-2: #1e2330;
+    --border: #2a3040;
+    --text: #e8ebf2;
+    --muted: #8a93a6;
+    --accent: #3b82f6;
+    --done: #22c55e;
+    --playing: #f59e0b;
+    --played: #a78bfa;
+    --wish: #38bdf8;
+    --star: #facc15;
+    --platinum: #cbd5e1;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 16px 64px; }
+
+  header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+  h1 { margin: 0; font-size: clamp(28px, 5vw, 40px); font-weight: 800; letter-spacing: -0.02em; }
+  h1 span { color: var(--accent); }
+  .subtitle { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+  .stat .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  .stat .value { font-size: 26px; font-weight: 800; margin-top: 2px; }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 4px; }
+  .tab {
+    border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 14px; font-weight: 600;
+    padding: 8px 14px; border-radius: 999px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { background: var(--surface-2); color: var(--text); }
+  .tab .count { font-size: 12px; color: var(--muted); background: var(--bg); padding: 1px 7px; border-radius: 999px; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+  select, input[type=search] {
+    background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 10px;
+    padding: 8px 12px; font: inherit; font-size: 14px;
+  }
+  input[type=search] { min-width: 0; width: 200px; }
+
+  .year-group { margin-bottom: 28px; }
+  .year-group h2 { font-size: 15px; color: var(--muted); font-weight: 700; margin: 0 0 12px; letter-spacing: .04em; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; display: flex; flex-direction: column;
+  }
+  .cover { position: relative; aspect-ratio: 16 / 9; background: var(--surface-2); display: grid; place-items: center; overflow: hidden; }
+  .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cover .initials { font-size: 42px; font-weight: 800; color: rgba(255,255,255,.85); letter-spacing: -0.03em; }
+  .badge {
+    position: absolute; top: 10px; left: 10px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+    padding: 4px 9px; border-radius: 999px; background: rgba(13,15,20,.85); border: 1px solid currentColor;
+  }
+  .badge.zerado { color: var(--done); }
+  .badge.jogando { color: var(--playing); }
+  .badge.jogado { color: var(--played); }
+  .badge.quero { color: var(--wish); }
+  .plat { position: absolute; top: 10px; right: 10px; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 6px; background: rgba(13,15,20,.85); color: var(--text); }
+
+  .body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .title { font-size: 17px; font-weight: 700; margin: 0; }
+  .stars { color: var(--star); font-size: 16px; letter-spacing: 2px; }
+  .stars .off { color: var(--border); }
+  .stars small { color: var(--muted); font-size: 12px; letter-spacing: 0; margin-left: 4px; }
+
+  .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; }
+  .meta div { background: var(--bg); border-radius: 8px; padding: 7px 10px; }
+  .meta .k { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+  .meta .v { font-weight: 600; }
+  .pending { color: var(--muted); font-style: italic; font-weight: 500; }
+
+  .progress { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted); }
+  .bar { flex: 1; height: 6px; background: var(--bg); border-radius: 999px; overflow: hidden; }
+  .bar span { display: block; height: 100%; background: var(--accent); }
+
+  .trophy-note { font-size: 12px; color: var(--muted); border-left: 2px solid var(--done); padding-left: 8px; }
+  .trophy-note b { color: var(--text); font-weight: 600; }
+  .note { font-size: 13px; color: var(--muted); }
+  .links { margin-top: auto; display: flex; gap: 10px; font-size: 13px; }
+  .links a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .links a:hover { text-decoration: underline; }
+
+  .empty { text-align: center; color: var(--muted); padding: 48px 16px; border: 1px dashed var(--border); border-radius: var(--radius); }
+
+  footer { margin-top: 40px; color: var(--muted); font-size: 12px; text-align: center; }
+
+  @media (max-width: 520px) {
+    .grid { grid-template-columns: 1fr; }
+    .filters, .filters > * { width: 100%; }
+    input[type=search] { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Games <span>Log</span></h1>
+      <p class="subtitle">O que eu zerei, o que estou jogando e o que quero jogar.</p>
+    </div>
+  </header>
+
+  <section class="stats" id="stats"></section>
+
+  <div class="toolbar">
+    <nav class="tabs" id="tabs"></nav>
+    <div class="filters">
+      <select id="yearFilter" aria-label="Filtrar por ano"></select>
+      <input type="search" id="search" placeholder="Buscar jogo..." aria-label="Buscar jogo">
+    </div>
+  </div>
+
+  <main id="list"></main>
+
+  <footer>Datas de conclusão baseadas no troféu de fim de jogo da PSN. Notas são minhas, não da comunidade.</footer>
+</div>
+
+<script>
+/*
+ * ============================================================
+ *  DADOS DOS JOGOS — edite aqui para adicionar/atualizar jogos
+ * ============================================================
+ *  status:       "zerado" | "jogando" | "jogado" (joguei mas não zerei) | "quero"
+ *  platform:     "PS5", "PS4", ...
+ *  rating:       minha nota de 0 a 5 (null = sem nota)
+ *  startedAt:    data do primeiro troféu (AAAA-MM-DD)
+ *  finishedAt:   data do troféu que indica que o jogo foi zerado (AAAA-MM-DD)
+ *  finishTrophy: nome do troféu usado para determinar que zerou
+ *  trophies:     { earned, total, progress (%), platinum (true/false) }
+ *  hours:        horas jogadas (se disponível)
+ *  cover:        URL da capa (opcional)
+ *  psnUrl:       link da página do jogo no perfil da PSN
+ */
+const GAMES = [
+  {
+    title: "Resident Evil 3",
+    platform: "PS4",
+    status: "zerado",
+    rating: 3,
+    startedAt: null,
+    finishedAt: null,
+    finishTrophy: null,
+    trophies: null,
+    hours: null,
+    cover: "",
+    psnUrl: "https://psnprofiles.com/trophies/16678-resident-evil-3/gabcrstn",
+    notes: "Troféus, datas e horas ainda não importados da PSN."
+  }
+];
+
+/* ============================================================ */
+
+const STATUS = {
+  zerado:  { label: "Zerados",     badge: "Zerado" },
+  jogando: { label: "Jogando",     badge: "Jogando" },
+  jogado:  { label: "Já joguei",   badge: "Joguei" },
+  quero:   { label: "Quero jogar", badge: "Quero jogar" }
+};
+const TAB_ORDER = ["zerado", "jogando", "jogado", "quero"];
+const MONTHS = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+
+const state = { tab: "zerado", year: "all", query: "" };
+try {
+  const saved = JSON.parse(localStorage.getItem("gameslog-ui") || "{}");
+  if (saved.tab && STATUS[saved.tab]) state.tab = saved.tab;
+} catch (e) {}
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function fmtDate(iso) {
+  if (!iso) return null;
+  const [y, m, d] = iso.split("-").map(Number);
+  return `${String(d).padStart(2, "0")} ${MONTHS[m - 1]} ${y}`;
+}
+function yearOf(g) {
+  const d = g.finishedAt || g.startedAt;
+  return d ? d.slice(0, 4) : null;
+}
+function daysBetween(a, b) {
+  if (!a || !b) return null;
+  return Math.round((new Date(b) - new Date(a)) / 86400000);
+}
+function initials(title) {
+  return title.split(/\s+/).filter((w) => /[A-Za-z0-9]/.test(w[0])).slice(0, 3).map((w) => w[0]).join("").toUpperCase();
+}
+function hue(title) {
+  let h = 0;
+  for (const c of title) h = (h * 31 + c.charCodeAt(0)) % 360;
+  return h;
+}
+function stars(rating) {
+  if (rating == null) return `<div class="stars"><small>sem nota</small></div>`;
+  let out = "";
+  for (let i = 1; i <= 5; i++) out += i <= Math.round(rating) ? "★" : `<span class="off">★</span>`;
+  return `<div class="stars" aria-label="Nota ${rating} de 5">${out}<small>${rating}/5</small></div>`;
+}
+
+function renderStats() {
+  const done = GAMES.filter((g) => g.status === "zerado");
+  const thisYear = String(new Date().getFullYear());
+  const doneThisYear = done.filter((g) => g.finishedAt && g.finishedAt.startsWith(thisYear)).length;
+  const rated = GAMES.filter((g) => g.rating != null);
+  const avg = rated.length ? (rated.reduce((s, g) => s + g.rating, 0) / rated.length).toFixed(1) : "—";
+  const plats = GAMES.filter((g) => g.trophies && g.trophies.platinum).length;
+  const hours = GAMES.reduce((s, g) => s + (g.hours || 0), 0);
+  const items = [
+    ["Zerados", done.length],
+    [`Zerados em ${thisYear}`, doneThisYear],
+    ["Jogando", GAMES.filter((g) => g.status === "jogando").length],
+    ["Platinas", plats],
+    ["Minha nota média", avg],
+    ["Horas registradas", hours ? `${hours}h` : "—"]
+  ];
+  $("stats").innerHTML = items.map(([l, v]) => `<div class="stat"><div class="label">${l}</div><div class="value">${v}</div></div>`).join("");
+}
+
+function renderTabs() {
+  $("tabs").innerHTML = TAB_ORDER.map((k) => {
+    const n = GAMES.filter((g) => g.status === k).length;
+    return `<button class="tab ${state.tab === k ? "active" : ""}" data-tab="${k}">${STATUS[k].label}<span class="count">${n}</span></button>`;
+  }).join("");
+  $("tabs").querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => {
+    state.tab = b.dataset.tab;
+    state.year = "all";
+    try { localStorage.setItem("gameslog-ui", JSON.stringify({ tab: state.tab })); } catch (e) {}
+    render();
+  }));
+}
+
+function renderYearFilter(games) {
+  const years = [...new Set(games.map(yearOf).filter(Boolean))].sort().reverse();
+  $("yearFilter").innerHTML = `<option value="all">Todos os anos</option>` +
+    years.map((y) => `<option value="${y}" ${state.year === y ? "selected" : ""}>${y}</option>`).join("");
+}
+
+function card(g) {
+  const h = hue(g.title);
+  const cover = g.cover
+    ? `<img src="${esc(g.cover)}" alt="Capa de ${esc(g.title)}" loading="lazy">`
+    : `<span class="initials">${esc(initials(g.title))}</span>`;
+  const coverStyle = g.cover ? "" : `style="background: linear-gradient(135deg, hsl(${h} 55% 28%), hsl(${(h + 40) % 360} 60% 14%))"`;
+  const pending = `<span class="pending">a confirmar</span>`;
+  const t = g.trophies;
+  const days = daysBetween(g.startedAt, g.finishedAt);
+
+  const meta = [];
+  if (g.status === "zerado") meta.push(["Zerado em", fmtDate(g.finishedAt) || pending]);
+  meta.push(["Começou em", fmtDate(g.startedAt) || pending]);
+  if (g.status === "zerado" && days != null) meta.push(["Tempo até zerar", `${days} dia${days === 1 ? "" : "s"}`]);
+  meta.push(["Horas jogadas", g.hours != null ? `${g.hours}h` : pending]);
+  if (t) meta.push(["Troféus", `${t.earned}/${t.total}${t.platinum ? " · 🏆 Platina" : ""}`]);
+
+  return `
+  <article class="card">
+    <div class="cover" ${coverStyle}>
+      ${cover}
+      <span class="badge ${g.status}">${STATUS[g.status].badge}</span>
+      ${g.platform ? `<span class="plat">${esc(g.platform)}</span>` : ""}
+    </div>
+    <div class="body">
+      <h3 class="title">${esc(g.title)}</h3>
+      ${stars(g.rating)}
+      <div class="meta">${meta.map(([k, v]) => `<div><span class="k">${k}</span><span class="v">${v}</span></div>`).join("")}</div>
+      ${t && t.progress != null ? `<div class="progress"><div class="bar"><span style="width:${t.progress}%"></span></div>${t.progress}%</div>` : ""}
+      ${g.finishTrophy ? `<div class="trophy-note">Zerado pelo troféu <b>${esc(g.finishTrophy)}</b></div>` : ""}
+      ${g.notes ? `<div class="note">${esc(g.notes)}</div>` : ""}
+      ${g.psnUrl ? `<div class="links"><a href="${esc(g.psnUrl)}" target="_blank" rel="noopener">Ver troféus na PSN ↗</a></div>` : ""}
+    </div>
+  </article>`;
+}
+
+function sortGames(list) {
+  // Mais recentes primeiro: data de conclusão, depois início; sem data vai pro fim.
+  return list.slice().sort((a, b) => {
+    const da = a.finishedAt || a.startedAt || "";
+    const db = b.finishedAt || b.startedAt || "";
+    if (da === db) return a.title.localeCompare(b.title);
+    if (!da) return 1;
+    if (!db) return -1;
+    return db.localeCompare(da);
+  });
+}
+
+function renderList() {
+  const inTab = GAMES.filter((g) => g.status === state.tab);
+  renderYearFilter(inTab);
+  const q = state.query.trim().toLowerCase();
+  let list = inTab.filter((g) => (state.year === "all" || yearOf(g) === state.year) && (!q || g.title.toLowerCase().includes(q)));
+  list = sortGames(list);
+
+  if (!list.length) {
+    const msg = inTab.length ? "Nenhum jogo encontrado com esses filtros." : `Nenhum jogo em "${STATUS[state.tab].label}" ainda.`;
+    $("list").innerHTML = `<div class="empty">${msg}</div>`;
+    return;
+  }
+
+  // Agrupa por ano para a linha do tempo dos "últimos tempos".
+  const groups = new Map();
+  for (const g of list) {
+    const y = yearOf(g) || "Sem data";
+    if (!groups.has(y)) groups.set(y, []);
+    groups.get(y).push(g);
+  }
+  $("list").innerHTML = [...groups].map(([y, gs]) =>
+    `<section class="year-group"><h2>${y} · ${gs.length} jogo${gs.length === 1 ? "" : "s"}</h2><div class="grid">${gs.map(card).join("")}</div></section>`
+  ).join("");
+}
+
+function render() {
+  renderStats();
+  renderTabs();
+  renderList();
+}
+
+$("yearFilter").addEventListener("change", (e) => { state.year = e.target.value; renderList(); });
+$("search").addEventListener("input", (e) => { state.query = e.target.value; renderList(); });
+render();
+</script>
+</body>
+</html>
