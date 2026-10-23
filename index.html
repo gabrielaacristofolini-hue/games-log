@@ -19,6 +19,8 @@
     --faint: #4a4a4d;
     --line: #232326;
     --serif: "Source Serif 4", Georgia, serif;
+    --ps: #7aa7ff;
+    --steam: #8fc45a;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; }
@@ -70,13 +72,7 @@
   select:focus, input[type=search]:focus { outline: none; border-color: var(--muted); }
   input[type=search] { width: 170px; }
   .views { display: flex; gap: 12px; padding-left: 12px; border-left: 1px solid var(--line); }
-  .subbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px; padding: 12px 0 18px; }
-  .platforms { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
-  .platforms button { background: none; border: 0; padding: 4px 0; cursor: pointer; }
-  .platforms button:hover { color: var(--text); }
-  .platforms button[aria-pressed="true"] { color: var(--text); }
-  .platforms button span { color: var(--faint); margin-left: 3px; }
-  .platforms .title { color: var(--faint); }
+  .count { padding: 12px 0 18px; }
 
   /* Grade */
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 28px 18px; align-items: start; }
@@ -88,6 +84,9 @@
     padding: 3px 6px; border-radius: 2px; background: rgba(11,11,12,.82); color: var(--text);
   }
   .list .pbadge, dialog .pbadge { display: none; }
+  /* Cor discreta por plataforma */
+  .pf-ps { color: var(--ps) !important; }
+  .pf-steam { color: var(--steam) !important; }
   .cover .ph { position: absolute; inset: 0; display: grid; place-items: center; padding: 10px; text-align: center; font-family: var(--serif); font-size: 15px; color: var(--soft); }
   .cover::after { content: ""; position: absolute; inset: 0; border-radius: 3px; box-shadow: inset 0 0 0 2px transparent; transition: box-shadow .15s; }
   .card:hover .cover::after, .card:focus-visible .cover::after { box-shadow: inset 0 0 0 2px var(--text); }
@@ -145,8 +144,7 @@
     .controls input[type=search] { grid-column: 1 / -1; width: 100%; }
     .views { grid-column: 1 / -1; border-left: 0; padding-left: 0; }
     .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 12px; }
-    .platforms { gap: 16px; }
-    .platforms .title { display: none; }
+    #sort { grid-column: 1 / -1; }
     .list .opt { display: none; }
     .list th, .list td { padding-left: 6px; padding-right: 6px; }
     .list .game { min-width: 0; gap: 10px; }
@@ -171,20 +169,18 @@
   <div class="toolbar">
     <div class="status" id="status"></div>
     <div class="controls">
+      <select id="platform" aria-label="Plataforma"></select>
       <select id="year" aria-label="Ano"></select>
       <select id="sort" aria-label="Ordenar por"></select>
       <input type="search" id="search" placeholder="Buscar jogo" aria-label="Buscar jogo">
       <div class="views" id="views"></div>
     </div>
   </div>
-  <div class="subbar">
-    <div class="platforms" id="platforms"></div>
-    <div class="label" id="count"></div>
-  </div>
+  <div class="count label" id="count"></div>
 
   <main id="games"></main>
 
-  <footer>Dados das APIs da PSN e da Steam. Início = primeiro troféu ou conquista · Zerado = troféu de fim de história · Platina = troféu de platina · Testado = menos de 3 horas jogadas sem zerar.</footer>
+  <footer>Dados das APIs da PSN e da Steam. Início = primeiro troféu ou conquista · Zerado = troféu de fim de história · Platina = troféu de platina · Testado = menos de 2 horas jogadas sem zerar.</footer>
 </div>
 
 <dialog id="game"></dialog>
@@ -195,7 +191,7 @@
  *  DADOS DOS JOGOS — edite aqui para adicionar/atualizar jogos
  * ============================================================
  *  id:           identificador único (lista de troféus da PSN, ou o título na PSN quando não há troféus)
- *  platform:     "PS5", "PS4" ou "Steam" (o mesmo jogo em duas plataformas vira dois itens)
+ *  platform:     "PS5" ou "Steam" (o mesmo jogo em duas plataformas vira dois itens)
  *  startedAt:    data do primeiro troféu (AAAA-MM-DD); sem troféus, a primeira vez que abri o jogo
  *  finishedAt:   data do troféu que indica que o jogo foi zerado (AAAA-MM-DD); null = não zerado
  *  finishTrophy: nome do troféu usado para determinar que zerou
@@ -288,7 +284,7 @@ const GAMES = [
   {
     id: "NPWR09412_00",
     title: "Red Dead Redemption 2",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-06-19",
     finishedAt: "2026-02-14",
     finishTrophy: "Endless Summer",
@@ -423,7 +419,7 @@ const GAMES = [
   {
     id: "NPWR13822_00",
     title: "Assassin's Creed Odyssey",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-06-29",
     finishedAt: null,
     finishTrophy: null,
@@ -498,7 +494,7 @@ const GAMES = [
   {
     id: "NPWR15055_00",
     title: "Far Cry 3 Classic Edition",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2026-07-03",
     finishedAt: null,
     finishTrophy: null,
@@ -543,7 +539,7 @@ const GAMES = [
   {
     id: "NPWR13427_00",
     title: "Shadow of the Colossus",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-06-18",
     finishedAt: null,
     finishTrophy: null,
@@ -558,7 +554,7 @@ const GAMES = [
   {
     id: "NPWR12518_00",
     title: "God of War",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-05-12",
     finishedAt: "2025-06-17",
     finishTrophy: "Last Wish",
@@ -603,7 +599,7 @@ const GAMES = [
   {
     id: "NPWR07057_00",
     title: "Resident Evil",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2026-03-30",
     finishedAt: null,
     finishTrophy: null,
@@ -693,7 +689,7 @@ const GAMES = [
   {
     id: "NPWR10102_00",
     title: "Resident Evil 6",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-12-25",
     finishedAt: null,
     finishTrophy: null,
@@ -708,7 +704,7 @@ const GAMES = [
   {
     id: "NPWR10886_00",
     title: "Resident Evil 4 (2005)",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2026-03-09",
     finishedAt: null,
     finishTrophy: null,
@@ -723,7 +719,7 @@ const GAMES = [
   {
     id: "NPWR10600_00",
     title: "Resident Evil 5",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-12-25",
     finishedAt: null,
     finishTrophy: null,
@@ -813,7 +809,7 @@ const GAMES = [
   {
     id: "NPWR16485_00",
     title: "Hollow Knight",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2026-01-01",
     finishedAt: null,
     finishTrophy: null,
@@ -828,7 +824,7 @@ const GAMES = [
   {
     id: "NPWR09798_00",
     title: "Uncharted: The Nathan Drake Collection",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-12-27",
     finishedAt: null,
     finishTrophy: null,
@@ -903,7 +899,7 @@ const GAMES = [
   {
     id: "NPWR08268_00",
     title: "God of War III Remastered",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-12-25",
     finishedAt: null,
     finishTrophy: null,
@@ -933,7 +929,7 @@ const GAMES = [
   {
     id: "NPWR20878_00",
     title: "Mafia: Definitive Edition",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-12-21",
     finishedAt: null,
     finishTrophy: null,
@@ -1008,7 +1004,7 @@ const GAMES = [
   {
     id: "NPWR38289_00",
     title: "Roblox",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-11-16",
     finishedAt: null,
     finishTrophy: null,
@@ -1053,7 +1049,7 @@ const GAMES = [
   {
     id: "NPWR13387_00",
     title: "Battlefield V",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-09-22",
     finishedAt: null,
     finishTrophy: null,
@@ -1068,7 +1064,7 @@ const GAMES = [
   {
     id: "NPWR15895_00",
     title: "Tom Clancy's The Division 2",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-08-23",
     finishedAt: null,
     finishTrophy: null,
@@ -1083,7 +1079,7 @@ const GAMES = [
   {
     id: "NPWR08899_00",
     title: "Battlefield 1",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-05-14",
     finishedAt: null,
     finishTrophy: null,
@@ -1278,7 +1274,7 @@ const GAMES = [
   {
     id: "NPWR12668_00",
     title: "Outlast 2",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-07-05",
     finishedAt: null,
     finishTrophy: null,
@@ -1308,7 +1304,7 @@ const GAMES = [
   {
     id: "NPWR08243_00",
     title: "Metal Gear Solid V: The Phantom Pain",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-07-03",
     finishedAt: null,
     finishTrophy: null,
@@ -1353,7 +1349,7 @@ const GAMES = [
   {
     id: "NPWR17407_00",
     title: "Call of Duty: Black Ops Cold War",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-06-23",
     finishedAt: null,
     finishTrophy: null,
@@ -1383,7 +1379,7 @@ const GAMES = [
   {
     id: "NPWR16977_00",
     title: "Tom Clancy's Ghost Recon Breakpoint",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-06-17",
     finishedAt: null,
     finishTrophy: null,
@@ -1398,7 +1394,7 @@ const GAMES = [
   {
     id: "NPWR11595_00",
     title: "Call of Duty: WWII",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-05-17",
     finishedAt: null,
     finishTrophy: null,
@@ -1413,7 +1409,7 @@ const GAMES = [
   {
     id: "NPWR10664_00",
     title: "Watch Dogs 2",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-06-01",
     finishedAt: null,
     finishTrophy: null,
@@ -1428,7 +1424,7 @@ const GAMES = [
   {
     id: "NPWR05706_00",
     title: "Minecraft",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-05-13",
     finishedAt: null,
     finishTrophy: null,
@@ -1458,7 +1454,7 @@ const GAMES = [
   {
     id: "NPWR14211_00",
     title: "MudRunner",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-06-01",
     finishedAt: null,
     finishTrophy: null,
@@ -1473,7 +1469,7 @@ const GAMES = [
   {
     id: "NPWR17130_00",
     title: "Days Gone",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-06-01",
     finishedAt: null,
     finishTrophy: null,
@@ -1503,7 +1499,7 @@ const GAMES = [
   {
     id: "NPWR05677_00",
     title: "Rayman Legends",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-05-18",
     finishedAt: null,
     finishTrophy: null,
@@ -1533,7 +1529,7 @@ const GAMES = [
   {
     id: "NPWR14240_00",
     title: "Dynasty Warriors 9",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-05-17",
     finishedAt: null,
     finishTrophy: null,
@@ -1548,7 +1544,7 @@ const GAMES = [
   {
     id: "NPWR21088_00",
     title: "Scott Pilgrim vs. the World: The Game",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-05-17",
     finishedAt: null,
     finishTrophy: null,
@@ -1578,7 +1574,7 @@ const GAMES = [
   {
     id: "NPWR11424_00",
     title: "Assassin's Creed Origins",
-    platform: "PS4",
+    platform: "PS5",
     startedAt: "2025-05-13",
     finishedAt: null,
     finishTrophy: null,
@@ -1895,7 +1891,7 @@ const GAMES = [
 /* ============================================================ */
 
 const MONTHS = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
-const TEST_HOURS = 3;
+const TEST_HOURS = 2;
 const STATUS = {
   todos:      { label: "Todos",      test: () => true },
   zerados:    { label: "Zerados",    test: (g) => statusOf(g) === "zerado" },
@@ -1913,7 +1909,7 @@ const SORTS = {
 };
 const VIEWS = { grade: "Grade", lista: "Lista" };
 const PLATFORMS = {
-  todas:       { label: "Todas",       test: () => true },
+  todas:       { label: "Todas as plataformas", test: () => true },
   playstation: { label: "PlayStation", test: (g) => /^PS/.test(g.platform) },
   steam:       { label: "Steam",       test: (g) => g.platform === "Steam" }
 };
@@ -1936,6 +1932,7 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const isDone = (g) => !!g.finishedAt;
 const isPlat = (g) => !!g.platinumAt;
+const pfClass = (g) => (g.platform === "Steam" ? "pf-steam" : "pf-ps");
 const statusOf = (g) => (isDone(g) ? "zerado" : g.hours == null || g.hours < TEST_HOURS ? "testado" : "jogando");
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 // Mais recente primeiro; sem data vai pro fim; empate por nome.
@@ -1999,7 +1996,7 @@ function tags(g) {
   return status + (isPlat(g) ? `<span class="tag plat">${ICON.plat}Platinado</span>` : "");
 }
 function cover(g) {
-  return `<span class="cover"><span class="ph">${esc(g.title)}</span>${imgTag(coverSources(g), `Capa de ${g.title}`)}<span class="pbadge">${esc(g.platform)}</span></span>`;
+  return `<span class="cover"><span class="ph">${esc(g.title)}</span>${imgTag(coverSources(g), `Capa de ${g.title}`)}<span class="pbadge ${pfClass(g)}">${esc(g.platform)}</span></span>`;
 }
 
 /* ---------- Topo ---------- */
@@ -2014,7 +2011,7 @@ function renderHero() {
     <div class="wrap feature">
       <div class="label">Jogado recentemente</div>
       <h1>${esc(g.title)}</h1>
-      <div class="meta"><span>${esc(g.platform)}</span><span>·</span><span>${when}</span>${tags(g)}</div>
+      <div class="meta"><span class="${pfClass(g)}">${esc(g.platform)}</span><span>·</span><span>${when}</span>${tags(g)}</div>
       <button type="button" class="more label" data-game="${esc(g.id)}">Ver detalhes</button>
     </div>`;
 }
@@ -2026,8 +2023,8 @@ function renderControls() {
   $("status").innerHTML = Object.entries(STATUS).map(([k, s]) =>
     `<button type="button" class="label" data-status="${k}" aria-pressed="${state.status === k}">${s.label}<span>${inPlatform.filter(s.test).length}</span></button>`).join("");
   const inStatus = GAMES.filter(STATUS[state.status].test);
-  $("platforms").innerHTML = `<span class="label title">Plataforma</span>` + Object.entries(PLATFORMS).map(([k, p]) =>
-    `<button type="button" class="label" data-platform="${k}" aria-pressed="${state.platform === k}">${p.label}<span>${inStatus.filter(p.test).length}</span></button>`).join("");
+  $("platform").innerHTML = Object.entries(PLATFORMS).map(([k, p]) =>
+    `<option value="${k}"${state.platform === k ? " selected" : ""}>${p.label} (${inStatus.filter(p.test).length})</option>`).join("");
 
   const years = [...new Set(GAMES.flatMap((g) => [...yearsOf(g), (g.finishedAt || "").slice(0, 4)]).filter(Boolean))].sort().reverse();
   if (state.year !== "all" && !years.includes(state.year)) state.year = "all";
@@ -2048,7 +2045,7 @@ function gridView(list) {
     <button type="button" class="card" data-game="${esc(g.id)}">
       ${cover(g)}
       <span class="name">${esc(g.title)}</span>
-      <span class="plat-name">${esc(g.platform)}</span>
+      <span class="plat-name ${pfClass(g)}">${esc(g.platform)}</span>
       <span class="tags">${tags(g)}</span>
     </button>`).join("")}</div>`;
 }
@@ -2056,7 +2053,7 @@ function gridView(list) {
 function listView(list) {
   const rows = list.map((g) => `
     <tr data-game="${esc(g.id)}">
-      <td><div class="game">${cover(g)}<div><b>${esc(g.title)}</b><small>${esc(g.platform)}</small></div></div></td>
+      <td><div class="game">${cover(g)}<div><b>${esc(g.title)}</b><small class="${pfClass(g)}">${esc(g.platform)}</small></div></div></td>
       <td><span class="tags">${tags(g)}</span></td>
       <td class="opt">${fmtDate(g.startedAt)}</td>
       <td class="opt">${fmtDate(g.finishedAt)}</td>
@@ -2097,7 +2094,7 @@ function openGame(id) {
       <div>${cover(g)}</div>
       <div>
         <h2 class="d-title">${esc(g.title)}</h2>
-        <div class="d-sub">${esc([g.platform, ...(g.genres || [])].filter(Boolean).join(" · "))}</div>
+        <div class="d-sub"><span class="${pfClass(g)}">${esc(g.platform)}</span>${(g.genres || []).map((x) => ` · ${esc(x)}`).join("")}</div>
         <div class="d-tags">${tags(g)}</div>
         <div class="facts">
           ${fact("Início", fmtDate(g.startedAt))}
@@ -2120,13 +2117,12 @@ document.addEventListener("click", (e) => {
   if (t === $("game") || t.closest(".close")) { $("game").close(); return; }
   const s = t.closest("[data-status]");
   if (s) { state.status = s.dataset.status; save(); renderControls(); renderGames(); return; }
-  const pf = t.closest("[data-platform]");
-  if (pf) { state.platform = pf.dataset.platform; save(); renderControls(); renderGames(); return; }
   const v = t.closest("[data-view]");
   if (v) { state.view = v.dataset.view; save(); renderControls(); renderGames(); return; }
   const g = t.closest("[data-game]");
   if (g && !g.closest("dialog")) openGame(g.dataset.game);
 });
+$("platform").addEventListener("change", (e) => { state.platform = e.target.value; save(); renderControls(); renderGames(); });
 $("year").addEventListener("change", (e) => { state.year = e.target.value; save(); renderGames(); });
 $("sort").addEventListener("change", (e) => { state.sort = e.target.value; save(); renderGames(); });
 $("search").addEventListener("input", (e) => { state.query = e.target.value; renderGames(); });
