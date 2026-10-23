@@ -70,13 +70,24 @@
   select:focus, input[type=search]:focus { outline: none; border-color: var(--muted); }
   input[type=search] { width: 170px; }
   .views { display: flex; gap: 12px; padding-left: 12px; border-left: 1px solid var(--line); }
-  .count { padding: 12px 0 18px; }
+  .subbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px; padding: 12px 0 18px; }
+  .platforms { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
+  .platforms button { background: none; border: 0; padding: 4px 0; cursor: pointer; }
+  .platforms button:hover { color: var(--text); }
+  .platforms button[aria-pressed="true"] { color: var(--text); }
+  .platforms button span { color: var(--faint); margin-left: 3px; }
+  .platforms .title { color: var(--faint); }
 
   /* Grade */
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 28px 18px; align-items: start; }
   .card { cursor: pointer; background: none; border: 0; padding: 0; text-align: left; display: block; width: 100%; }
   .cover { display: block; aspect-ratio: 1; position: relative; overflow: hidden; background: var(--panel); border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
   .cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .pbadge {
+    position: absolute; top: 6px; left: 6px; z-index: 1; font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    padding: 3px 6px; border-radius: 2px; background: rgba(11,11,12,.82); color: var(--text);
+  }
+  .list .pbadge, dialog .pbadge { display: none; }
   .cover .ph { position: absolute; inset: 0; display: grid; place-items: center; padding: 10px; text-align: center; font-family: var(--serif); font-size: 15px; color: var(--soft); }
   .cover::after { content: ""; position: absolute; inset: 0; border-radius: 3px; box-shadow: inset 0 0 0 2px transparent; transition: box-shadow .15s; }
   .card:hover .cover::after, .card:focus-visible .cover::after { box-shadow: inset 0 0 0 2px var(--text); }
@@ -134,6 +145,8 @@
     .controls input[type=search] { grid-column: 1 / -1; width: 100%; }
     .views { grid-column: 1 / -1; border-left: 0; padding-left: 0; }
     .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 12px; }
+    .platforms { gap: 16px; }
+    .platforms .title { display: none; }
     .list .opt { display: none; }
     .list th, .list td { padding-left: 6px; padding-right: 6px; }
     .list .game { min-width: 0; gap: 10px; }
@@ -164,7 +177,10 @@
       <div class="views" id="views"></div>
     </div>
   </div>
-  <div class="count label" id="count"></div>
+  <div class="subbar">
+    <div class="platforms" id="platforms"></div>
+    <div class="label" id="count"></div>
+  </div>
 
   <main id="games"></main>
 
@@ -179,7 +195,7 @@
  *  DADOS DOS JOGOS — edite aqui para adicionar/atualizar jogos
  * ============================================================
  *  id:           identificador único (lista de troféus da PSN, ou o título na PSN quando não há troféus)
- *  platform:     "PS5", "PS4", ...
+ *  platform:     "PS5", "PS4" ou "Steam" (o mesmo jogo em duas plataformas vira dois itens)
  *  startedAt:    data do primeiro troféu (AAAA-MM-DD); sem troféus, a primeira vez que abri o jogo
  *  finishedAt:   data do troféu que indica que o jogo foi zerado (AAAA-MM-DD); null = não zerado
  *  finishTrophy: nome do troféu usado para determinar que zerou
@@ -1611,11 +1627,17 @@ const SORTS = {
   nome:     { label: "Nome (A–Z)",           cmp: (a, b) => a.title.localeCompare(b.title) }
 };
 const VIEWS = { grade: "Grade", lista: "Lista" };
+const PLATFORMS = {
+  todas:       { label: "Todas",       test: () => true },
+  playstation: { label: "PlayStation", test: (g) => /^PS/.test(g.platform) },
+  steam:       { label: "Steam",       test: (g) => g.platform === "Steam" }
+};
 
-const state = { status: "todos", year: "all", sort: "recentes", view: "grade", query: "" };
+const state = { status: "todos", platform: "todas", year: "all", sort: "recentes", view: "grade", query: "" };
 try {
   const saved = JSON.parse(localStorage.getItem("gameslog-ui") || "{}");
   if (STATUS[saved.status]) state.status = saved.status;
+  if (PLATFORMS[saved.platform]) state.platform = saved.platform;
   if (SORTS[saved.sort]) state.sort = saved.sort;
   if (VIEWS[saved.view]) state.view = saved.view;
   if (saved.year) state.year = saved.year;
@@ -1692,7 +1714,7 @@ function tags(g) {
   return status + (isPlat(g) ? `<span class="tag plat">${ICON.plat}Platinado</span>` : "");
 }
 function cover(g) {
-  return `<span class="cover"><span class="ph">${esc(g.title)}</span>${imgTag(coverSources(g), `Capa de ${g.title}`)}</span>`;
+  return `<span class="cover"><span class="ph">${esc(g.title)}</span>${imgTag(coverSources(g), `Capa de ${g.title}`)}<span class="pbadge">${esc(g.platform)}</span></span>`;
 }
 
 /* ---------- Topo ---------- */
@@ -1715,8 +1737,12 @@ function renderHero() {
 /* ---------- Filtros ---------- */
 
 function renderControls() {
+  const inPlatform = GAMES.filter(PLATFORMS[state.platform].test);
   $("status").innerHTML = Object.entries(STATUS).map(([k, s]) =>
-    `<button type="button" class="label" data-status="${k}" aria-pressed="${state.status === k}">${s.label}<span>${GAMES.filter(s.test).length}</span></button>`).join("");
+    `<button type="button" class="label" data-status="${k}" aria-pressed="${state.status === k}">${s.label}<span>${inPlatform.filter(s.test).length}</span></button>`).join("");
+  const inStatus = GAMES.filter(STATUS[state.status].test);
+  $("platforms").innerHTML = `<span class="label title">Plataforma</span>` + Object.entries(PLATFORMS).map(([k, p]) =>
+    `<button type="button" class="label" data-platform="${k}" aria-pressed="${state.platform === k}">${p.label}<span>${inStatus.filter(p.test).length}</span></button>`).join("");
 
   const years = [...new Set(GAMES.flatMap((g) => [...yearsOf(g), (g.finishedAt || "").slice(0, 4)]).filter(Boolean))].sort().reverse();
   if (state.year !== "all" && !years.includes(state.year)) state.year = "all";
@@ -1764,7 +1790,7 @@ function listView(list) {
 function renderGames() {
   const q = state.query.trim().toLowerCase();
   const list = GAMES
-    .filter((g) => STATUS[state.status].test(g) && inYear(g) && (!q || g.title.toLowerCase().includes(q)))
+    .filter((g) => STATUS[state.status].test(g) && PLATFORMS[state.platform].test(g) && inYear(g) && (!q || g.title.toLowerCase().includes(q)))
     .sort(SORTS[state.sort].cmp);
   $("count").textContent = plural(list.length, "jogo", "jogos");
   $("games").innerHTML = list.length
@@ -1809,6 +1835,8 @@ document.addEventListener("click", (e) => {
   if (t === $("game") || t.closest(".close")) { $("game").close(); return; }
   const s = t.closest("[data-status]");
   if (s) { state.status = s.dataset.status; save(); renderControls(); renderGames(); return; }
+  const pf = t.closest("[data-platform]");
+  if (pf) { state.platform = pf.dataset.platform; save(); renderControls(); renderGames(); return; }
   const v = t.closest("[data-view]");
   if (v) { state.view = v.dataset.view; save(); renderControls(); renderGames(); return; }
   const g = t.closest("[data-game]");
