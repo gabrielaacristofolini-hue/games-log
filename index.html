@@ -83,11 +83,6 @@
   .cover { display: block; aspect-ratio: 1; position: relative; overflow: hidden; background: var(--panel); border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
   /* Capa sempre inteira, sem recorte: imagens quadradas preenchem o quadro; as demais ganham preto em volta */
   .cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; }
-  .pbadge {
-    position: absolute; top: 6px; left: 6px; z-index: 1; font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
-    padding: 3px 6px; border-radius: 2px; background: rgba(11,11,12,.82); color: var(--text);
-  }
-  .list .pbadge, dialog .pbadge { display: none; }
   /* Cor discreta por plataforma */
   .pf-ps { color: var(--ps) !important; }
   .pf-steam { color: var(--steam) !important; }
@@ -2662,7 +2657,7 @@ function tags(g) {
     (isPlat(g) ? `<span class="tag plat" title="Platinado">${ICON.plat}<span class="tt">Platinado</span></span>` : "");
 }
 function cover(g) {
-  return `<span class="cover"><span class="ph">${esc(g.title)}</span>${imgTag(coverSources(g), `Capa de ${g.title}`)}<span class="pbadge ${pfClass(g)}">${esc(g.platform)}</span></span>`;
+  return `<span class="cover"><span class="ph">${esc(g.title)}</span>${imgTag(coverSources(g), `Capa de ${g.title}`)}</span>`;
 }
 
 /* ---------- Fundo (teste) ---------- */
